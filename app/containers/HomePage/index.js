@@ -6,8 +6,8 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Helmet } from 'react-helmet';
-import { FormattedMessage } from 'react-intl';
+// import { Helmet } from 'react-helmet';
+// import { FormattedMessage } from 'react-intl';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
@@ -20,18 +20,19 @@ import {
   makeSelectError,
 } from 'containers/App/selectors';
 import H2 from 'components/H2';
-import ReposList from 'components/ReposList';
-import AtPrefix from './AtPrefix';
-import CenteredSection from './CenteredSection';
-import Form from './Form';
-import Input from './Input';
-import Section from './Section';
-import messages from './messages';
+import { FileManager, FileNavigator } from '@opuscapita/react-filemanager';
+import connectorNodeV1 from '@opuscapita/react-filemanager-connector-node-v1';
+import Button from 'react-bootstrap/Button';
 import { loadRepos } from '../App/actions';
 import { changeUsername } from './actions';
 import { makeSelectUsername } from './selectors';
 import reducer from './reducer';
 import saga from './saga';
+
+const apiOptions = {
+  ...connectorNodeV1.apiOptions,
+  apiRoot: 'filemanager', // Or you local Server Node V1 installation.
+};
 
 /* eslint-disable react/prefer-stateless-function */
 export class HomePage extends React.PureComponent {
@@ -45,52 +46,22 @@ export class HomePage extends React.PureComponent {
   }
 
   render() {
-    const { loading, error, repos } = this.props;
-    const reposListProps = {
-      loading,
-      error,
-      repos,
-    };
+    // const { loading, error, repos } = this.props;
 
     return (
       <article>
-        <Helmet>
-          <title>Home Page</title>
-          <meta
-            name="description"
-            content="A React.js Boilerplate application homepage"
-          />
-        </Helmet>
-        <div>
-          <CenteredSection>
-            <H2>
-              <FormattedMessage {...messages.startProjectHeader} />
-            </H2>
-            <p>
-              <FormattedMessage {...messages.startProjectMessage} />
-            </p>
-          </CenteredSection>
-          <Section>
-            <H2>
-              <FormattedMessage {...messages.trymeHeader} />
-            </H2>
-            <Form onSubmit={this.props.onSubmitForm}>
-              <label htmlFor="username">
-                <FormattedMessage {...messages.trymeMessage} />
-                <AtPrefix>
-                  <FormattedMessage {...messages.trymeAtPrefix} />
-                </AtPrefix>
-                <Input
-                  id="username"
-                  type="text"
-                  placeholder="mxstbr"
-                  value={this.props.username}
-                  onChange={this.props.onChangeUsername}
-                />
-              </label>
-            </Form>
-            <ReposList {...reposListProps} />
-          </Section>
+        <div style={{ height: '480px' }}>
+          <FileManager>
+            <FileNavigator
+              id="filemanager-1"
+              api={connectorNodeV1.api}
+              apiOptions={apiOptions}
+              capabilities={connectorNodeV1.capabilities}
+              listViewLayout={connectorNodeV1.listViewLayout}
+              viewLayoutOptions={connectorNodeV1.viewLayoutOptions}
+            />
+          </FileManager>
+          <Button variant="primary">Primary</Button>
         </div>
       </article>
     );
