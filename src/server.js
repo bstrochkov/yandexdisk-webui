@@ -31,6 +31,7 @@ import schema from './data/schema';
 // import assets from './asset-manifest.json'; // eslint-disable-line import/no-unresolved
 import chunks from './chunk-manifest.json'; // eslint-disable-line import/no-unresolved
 import config from './config';
+const filemanagerMiddleware = require('@opuscapita/filemanager-server').middleware;
 
 process.on('unhandledRejection', (reason, p) => {
   console.error('Unhandled Rejection at:', p, 'reason:', reason);
@@ -52,6 +53,19 @@ const app = express();
 // Default is to trust proxy headers only from loopback interface.
 // -----------------------------------------------------------------------------
 app.set('trust proxy', config.trustProxy);
+
+
+//
+// File Manager
+// -----------------------------------------------------------------------------
+const filemanagerConfig = {
+  fsRoot: path.resolve(__dirname, '../public'),
+  rootName: 'Customization area'
+};
+const baseUrl = process.env.BASE_URL || '/files';
+app.use('/', filemanagerMiddleware(filemanagerConfig));
+// app.use('/files', () => {console.log('sdfsdf')});
+
 
 //
 // Register Node.js middleware

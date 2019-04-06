@@ -14,6 +14,9 @@
   ],
   "dependencies": {
     "@babel/polyfill": "^7.0.0",
+    "@opuscapita/filemanager-server": "^1.1.0-beta.6",
+    "@opuscapita/react-filemanager": "^1.1.0-beta.6",
+    "@opuscapita/react-filemanager-connector-node-v1": "^1.1.0-beta.6",
     "body-parser": "^1.18.3",
     "bootstrap": "^4.3.1",
     "classnames": "^2.2.6",
@@ -35,6 +38,7 @@
     "react": "^16.5.2",
     "react-bootstrap": "1.0.0-beta.5",
     "react-dom": "^16.5.2",
+    "react-no-ssr": "^1.1.0",
     "sequelize": "^4.38.1",
     "serialize-javascript": "^1.5.0",
     "source-map-support": "^0.5.9",

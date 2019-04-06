@@ -10,40 +10,84 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
-import Button from 'react-bootstrap/Button';
 import s from './Home.css';
+import Container from 'react-bootstrap/Container';
+import Form from 'react-bootstrap/Form';
+import Button from 'react-bootstrap/Button';
+import Card from 'react-bootstrap/Card';
+import NoSSR from 'react-no-ssr';
+
 
 class Home extends React.Component {
-  static propTypes = {
-    news: PropTypes.arrayOf(
-      PropTypes.shape({
-        title: PropTypes.string.isRequired,
-        link: PropTypes.string.isRequired,
-        content: PropTypes.string,
-      }),
-    ).isRequired,
+  // static propTypes = {
+  //   news: PropTypes.arrayOf(
+  //     PropTypes.shape({
+  //       title: PropTypes.string.isRequired,
+  //       link: PropTypes.string.isRequired,
+  //       content: PropTypes.string,
+  //     }),
+  //   ).isRequired,
+  // };
+  
+  onChange(currentNode, selectedNodes) {
+    console.log("path::", currentNode.path);
   };
+  
+  assignObjectPaths(obj, stack) {
+    Object.keys(obj).forEach(k => {
+      const node = obj[k];
+      if (typeof node === "object") {
+        node.path = stack ? `${stack}.${k}` : k;
+        this.assignObjectPaths(node, node.path);
+      }
+    });
+  };
+  
+  renderFileManager() {
+    if (!process.env.BROWSER) {
+      return undefined;
+    }
+    const { FileManager, FileNavigator } = require('@opuscapita/react-filemanager');
+    const connectorNodeV1 = require('@opuscapita/react-filemanager-connector-node-v1');
+    const apiOptions = {
+      ...connectorNodeV1.apiOptions,
+      apiRoot: '' // Or you local Server Node V1 installation .
+    }
+    return (
+      <NoSSR>
+        <FileManager>
+          <FileNavigator
+            id="filemanager-1"
+            api={connectorNodeV1.api}
+            apiOptions={apiOptions}
+            capabilities={connectorNodeV1.capabilities}
+            listViewLayout={connectorNodeV1.listViewLayout}
+            viewLayoutOptions={connectorNodeV1.viewLayoutOptions}
+          />
+        </FileManager>
+      </NoSSR>
+    );
+  }
 
   render() {
     return (
-      <div className={s.root}>
-        <div className={s.container}>
-          <h1>React.js News</h1>
-          {this.props.news.map(item => (
-            <article key={item.link} className={s.newsItem}>
-              <h1 className={s.newsTitle}>
-                <a href={item.link}>{item.title}</a>
-                <Button variant="primary">Primary</Button>
-              </h1>
-              <div
-                className={s.newsDesc}
-                // eslint-disable-next-line react/no-danger
-                dangerouslySetInnerHTML={{ __html: item.content }}
-              />
-            </article>
-          ))}
-        </div>
-      </div>
+      <Container>
+        <Card className="my-4">
+          <Card.Header>Directories</Card.Header>
+          <Card.Body>
+            <Form>
+              <Form.Group controlId="targetFolder">
+                <Form.Label>Folder location</Form.Label>
+                <Form.Control type="file" />
+              </Form.Group>
+              {this.renderFileManager()}
+              <Button variant="primary" type="submit">
+                Submit
+              </Button>
+            </Form>
+          </Card.Body>
+        </Card>
+      </Container>
     );
   }
 }
