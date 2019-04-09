@@ -6,8 +6,8 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-// import { Helmet } from 'react-helmet';
-// import { FormattedMessage } from 'react-intl';
+import { Helmet } from 'react-helmet';
+import { FormattedMessage } from 'react-intl';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
@@ -21,18 +21,22 @@ import {
 } from 'containers/App/selectors';
 import H2 from 'components/H2';
 import { FileManager, FileNavigator } from '@opuscapita/react-filemanager';
-import connectorNodeV1 from '@opuscapita/react-filemanager-connector-node-v1';
-import Button from 'react-bootstrap/Button';
+import connectorYandexDisk from './connector-yandex-disk';
+import messages from './messages';
 import { loadRepos } from '../App/actions';
 import { changeUsername } from './actions';
 import { makeSelectUsername } from './selectors';
 import reducer from './reducer';
 import saga from './saga';
 
-const apiOptions = {
-  ...connectorNodeV1.apiOptions,
-  apiRoot: 'filemanager', // Or you local Server Node V1 installation.
-};
+const connectorOptions = {
+  id: '920898038632-cto7a1so6e2ill0jce9c2t9k5g2k41dv.apps.googleusercontent.com',
+  password: 'An9SnKkN8rtbz3Selstl4Xil',
+}
+
+//ID: d111f0c9a2e746268ed9d94aebb3b940
+//Password: 56ccc311807f47198c3d8e5e643fca17
+//Callback URL: https://oauth.yandex.com/verification_code
 
 /* eslint-disable react/prefer-stateless-function */
 export class HomePage extends React.PureComponent {
@@ -46,7 +50,12 @@ export class HomePage extends React.PureComponent {
   }
 
   render() {
-    // const { loading, error, repos } = this.props;
+    const { loading, error, repos } = this.props;
+    const reposListProps = {
+      loading,
+      error,
+      repos,
+    };
 
     return (
       <article>
@@ -54,14 +63,13 @@ export class HomePage extends React.PureComponent {
           <FileManager>
             <FileNavigator
               id="filemanager-1"
-              api={connectorNodeV1.api}
-              apiOptions={apiOptions}
-              capabilities={connectorNodeV1.capabilities}
-              listViewLayout={connectorNodeV1.listViewLayout}
-              viewLayoutOptions={connectorNodeV1.viewLayoutOptions}
+              api={connectorYandexDisk.api}
+              apiOptions={connectorOptions}
+              capabilities={connectorYandexDisk.capabilities}
+              listViewLayout={connectorYandexDisk.listViewLayout}
+              viewLayoutOptions={connectorYandexDisk.viewLayoutOptions}
             />
           </FileManager>
-          <Button variant="primary">Primary</Button>
         </div>
       </article>
     );
