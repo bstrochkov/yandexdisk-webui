@@ -19,10 +19,8 @@ import {
   makeSelectLoading,
   makeSelectError,
 } from 'containers/App/selectors';
-import H2 from 'components/H2';
 import { FileManager, FileNavigator } from '@opuscapita/react-filemanager';
 import connectorYandexDisk from './connector-yandex-disk';
-import messages from './messages';
 import { loadRepos } from '../App/actions';
 import { changeUsername } from './actions';
 import { makeSelectUsername } from './selectors';
@@ -30,9 +28,9 @@ import reducer from './reducer';
 import saga from './saga';
 
 const connectorOptions = {
-  id: '920898038632-cto7a1so6e2ill0jce9c2t9k5g2k41dv.apps.googleusercontent.com',
-  password: 'An9SnKkN8rtbz3Selstl4Xil',
-}
+  clientId: 'd111f0c9a2e746268ed9d94aebb3b940',
+  token: 'AQAAAAAClo3IAAWZROdjUyaDHUUIv8wmbg3Myvo',
+};
 
 //ID: d111f0c9a2e746268ed9d94aebb3b940
 //Password: 56ccc311807f47198c3d8e5e643fca17
