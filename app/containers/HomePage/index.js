@@ -20,16 +20,16 @@ import {
   makeSelectError,
 } from 'containers/App/selectors';
 import { FileManager, FileNavigator } from '@opuscapita/react-filemanager';
-import connectorYandexDisk from './connector-yandex-disk';
+import connectorNodeV1 from '@opuscapita/react-filemanager-connector-node-v1';
 import { loadRepos } from '../App/actions';
 import { changeUsername } from './actions';
 import { makeSelectUsername } from './selectors';
 import reducer from './reducer';
 import saga from './saga';
 
-const connectorOptions = {
-  clientId: 'd111f0c9a2e746268ed9d94aebb3b940',
-  token: 'AQAAAAAClo3IAAWZROdjUyaDHUUIv8wmbg3Myvo',
+const apiOptions = {
+    ...connectorNodeV1.apiOptions,
+    apiRoot: `/yandexdisk`
 };
 
 //ID: d111f0c9a2e746268ed9d94aebb3b940
@@ -48,24 +48,17 @@ export class HomePage extends React.PureComponent {
   }
 
   render() {
-    const { loading, error, repos } = this.props;
-    const reposListProps = {
-      loading,
-      error,
-      repos,
-    };
-
     return (
       <article>
         <div style={{ height: '480px' }}>
           <FileManager>
             <FileNavigator
               id="filemanager-1"
-              api={connectorYandexDisk.api}
-              apiOptions={connectorOptions}
-              capabilities={connectorYandexDisk.capabilities}
-              listViewLayout={connectorYandexDisk.listViewLayout}
-              viewLayoutOptions={connectorYandexDisk.viewLayoutOptions}
+              api={connectorNodeV1.api}
+              apiOptions={apiOptions}
+              capabilities={connectorNodeV1.capabilities}
+              listViewLayout={connectorNodeV1.listViewLayout}
+              viewLayoutOptions={connectorNodeV1.viewLayoutOptions}
             />
           </FileManager>
         </div>

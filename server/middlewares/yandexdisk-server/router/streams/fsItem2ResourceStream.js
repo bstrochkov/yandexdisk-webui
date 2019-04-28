@@ -27,7 +27,7 @@ module.exports = class extends Transform {
     const resource = await getResource({
       config: this.config,
       stats: item.stats,
-      path: sep + relative(this.config.fsRoot, item.path) // `path.relative()` never starts/ends with `path.sep`.
+      path: sep + item.path // `path.relative()` never starts/ends with `path.sep`.
     });
 
     if (!this.isDestroyed) {

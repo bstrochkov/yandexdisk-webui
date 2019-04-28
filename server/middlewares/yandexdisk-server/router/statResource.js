@@ -12,7 +12,7 @@ module.exports = ({
   handleError,
   path: userPath
 }) => {
-  config.logger.info(`Stat for ${path.join(config.fsRoot, userPath)} requested by ${getClientIp(req)}`);
+  config.logger.info(`Stat for ${userPath} requested by ${getClientIp(req)}`);
 
   getResource({
     config,

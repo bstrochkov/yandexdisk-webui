@@ -14,15 +14,17 @@ const ngrok =
 const { resolve } = require('path');
 const app = express();
 
-// If you need a backend, e.g. an API, add your custom backend-specific middleware here
-const path = require('path');
-const filemanagerMiddleware = require('@opuscapita/filemanager-server')
-  .middleware;
+// =========== Yandex disk =========== //
+
+const yandexDiskMiddleware = require('./middlewares/yandexdisk-server')
+    .middleware;
 const config = {
-  fsRoot: path.resolve(__dirname, '../docs'),
-  rootName: 'Customization area',
+    rootName: 'Yandex Disk',
+    token: 'AQAAAAAClo3IAAWZROdjUyaDHUUIv8wmbg3Myvo',
 };
-app.use('/filemanager', filemanagerMiddleware(config));
+app.use('/yandexdisk', yandexDiskMiddleware(config));
+
+// =========== Yandex disk =========== //
 
 // In production we need to pass these values in instead of relying on webpack
 setup(app, {

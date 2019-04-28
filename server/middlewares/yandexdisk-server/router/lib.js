@@ -7,6 +7,7 @@ const { promisify } = require('util');
 const _isBinaryFile = promisify(require('isbinaryfile'));
 const textExtensions = require('textextensions').concat('gsp');
 const binaryExtensions = require('binaryextensions');
+const { YandexDisk } = require('yandex-disk');
 
 const getClientIp = require('../utils/get-client-ip');
 
@@ -45,6 +46,9 @@ switch (platform()) {
     fsCaseSensitive = true;
     break;
 }
+
+const disk = new YandexDisk(/* password */);
+const readdir = promisify(disk.readdir.bind(disk));
 
 const getBasenameSorter = caseSensitive => (basenameA, basenameB) => basenameA.localeCompare(basenameB, {
   sensitivity: caseSensitive && fsCaseSensitive ? 'variant' : 'accent'
@@ -113,7 +117,7 @@ const id2path = id => {
   }
 
   if (userPath !== path.sep && userPath.slice(-1) === path.sep) {
-    throw new Error(`Invalid path, it must not end with "${path.sep}"`);
+    throw new Error(`Invalid path (${userPath}), it must not end with "${path.sep}"`);
   }
 
   if (userPath.includes(path.sep + path.sep)) {
@@ -137,6 +141,42 @@ const checkName = name => {
   }
 
   return name;
+};
+
+const getChildren = async ({
+    config,
+    path
+}) => {
+    const dir = await readdir(path);
+    return {
+        items: dir.map(item => ({
+            capabilities: {
+                canDelete: false,
+                // canDelete: !config.readOnly,
+                canRename: false,
+                // canRename: !config.readOnly,
+                canCopy: false,
+                // canCopy: !config.readOnly,
+                canEdit: false, // Only files can be edited
+                // canEdit: !config.readOnly, // Only files can be edited
+                canDownload: false, // Only files can be downloaded
+                // canDownload: !item.isDir, // Only files can be downloaded
+                canListChildren: item.isDir,
+                canAddChildren: false,
+                // canAddChildren: item.isDir && !config.readOnly,
+                canRemoveChildren: false,
+                // canRemoveChildren: item.isDir && !config.readOnly,
+            },
+            createdTime: item.creationDate,
+            id: path2id(decodeURI(item.href.replace(/\/$/g, ''))),
+            modifiedTime: item.lastModified,
+            name: item.displayName,
+            type: item.isDir ? TYPE_DIR : TYPE_FILE,
+            size: item.size,
+            parentId: path,
+            ancestors: [],
+        })),
+    };
 };
 
 /*
@@ -168,45 +208,49 @@ const getResource = async ({
   }
   /* eslint-enable no-param-reassign */
 
-  let parent;
-
-  ([stats, parent] = await Promise.all([ // eslint-disable-line no-param-reassign,prefer-const
-    stats || fs.stat(path.join(config.fsRoot, userPath)),
-    userParent && getResource({
-      config,
-      path: userParent
-    })
-  ]));
+  stats = await readdir(userPath);
 
   const resource = {
     id: path2id(userPath),
     name: userBasename || config.rootName,
-    createdTime: stats.birthtime,
-    modifiedTime: stats.mtime,
+    createdTime: stats.creationDate,
+    modifiedTime: stats.lastModified,
     capabilities: {
       canDelete: !!userParent && !config.readOnly,
       canRename: !!userParent && !config.readOnly,
       canCopy: !!userParent && !config.readOnly,
-      canEdit: stats.isFile() && !config.readOnly, // Only files can be edited
-      canDownload: stats.isFile() // Only files can be downloaded
+      canEdit: !stats.isDir && !config.readOnly, // Only files can be edited
+      canDownload: !stats.isDir // Only files can be downloaded
     }
   };
 
-  if (stats.isDirectory()) {
+  if (stats.isDir) {
     resource.type = TYPE_DIR;
     resource.capabilities.canListChildren = true;
     resource.capabilities.canAddChildren = !config.readOnly;
     resource.capabilities.canRemoveChildren = !config.readOnly;
-  } else if (stats.isFile()) {
+  } else {
     resource.type = TYPE_FILE;
     resource.size = stats.size;
-  } else {
-    throw new Error(UNKNOWN_RESOURCE_TYPE_ERROR);
   }
 
-  if (parent) {
-    resource.parentId = parent.id;
-    resource.ancestors = [...parent.ancestors, parent];
+  if (userParent) {
+    resource.parentId = path2id(userParent);
+    resource.ancestors = userPath.split('/').reduce((accumulator, currentValue) => {
+      let lastPath = '';
+      let thisPath = '/';
+      if (accumulator.length) {
+        lastPath = accumulator[accumulator.length-1].path;
+        thisPath = lastPath === '/' ? lastPath : lastPath + '/';
+        thisPath = thisPath + currentValue;
+      }
+      return [...accumulator, {
+        id: path2id(thisPath),
+        name: currentValue,
+        path: thisPath
+      }];
+    }, []);
+    resource.ancestors.pop();
   } else {
     resource.ancestors = [];
   }
@@ -252,7 +296,7 @@ const isBinaryFile = async filePath => {
   }
 
   return _isBinaryFile(filePath);
-}
+};
 
 
 module.exports = {
@@ -262,6 +306,7 @@ module.exports = {
   id2path,
   path2id,
   getResource,
+  getChildren,
   handleError,
   isBinaryFile,
   fsCaseSensitive
